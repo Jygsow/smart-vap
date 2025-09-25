@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyseur de Traitements Bactériens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 32px;
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .header {
+            background: #fff;
+            color: #1e293b;
+            padding: 32px 40px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .form-container {
+            padding: 32px 40px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .bacteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        .bacteria-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+
+        .bacteria-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .bacteria-item.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .bacteria-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .submit-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: block;
+            margin: 24px auto 0;
+            min-width: 160px;
+        }
+
+        .submit-btn:hover {
+            background: #2563eb;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .result h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .result p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .selected-count {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+            transition: border-color 0.15s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .split-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .split-section {
+            flex: 1;
+        }
+
+        .section-title {
+            color: #374151;
+            margin-bottom: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bacteria-title {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .resistance-title {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Assistant Décisionnel SMART VAP</h1>
+            <p>Analyse et recommandations thérapeutiques pour bactéries et résistances</p>
+        </div>
+
+        <div class="form-container">
+            <form id="bacteriaForm">
+                <div class="form-group">
+                    <label for="examDirect">
+                        Résultats observés à l'examen direct :
+                    </label>
+                    <div class="bacteria-grid" style="max-height: 200px;">
+                        <div class="bacteria-item" data-exam="BGN">
+                            <input type="checkbox" id="exam_bgn" name="examDirect" value="BGN">
+                            BGN
+                        </div>
+                        <div class="bacteria-item" data-exam="BGP">
+                            <input type="checkbox" id="exam_bgp" name="examDirect" value="BGP">
+                            BGP
+                        </div>
+                        <div class="bacteria-item" data-exam="CG-">
+                            <input type="checkbox" id="exam_cg_neg" name="examDirect" value="CG-">
+                            CG-
+                        </div>
+                        <div class="bacteria-item" data-exam="CG+">
+                            <input type="checkbox" id="exam_cg_pos" name="examDirect" value="CG+">
+                            CG+
+                        </div>
+                        <div class="bacteria-item" data-exam="Pas de résultat">
+                            <input type="checkbox" id="exam_none" name="examDirect" value="Pas de résultat">
+                            Pas de résultat
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bacteria">
+                        Indiquez les bactéries (si ≥10^5 ou bactérie Atypique) et les résistances retrouvés au FAPP:
+                        <span id="selectedCount" class="selected-count">0 sélectionné(s)</span>
+                    </label>
+
+                    <input type="text" id="searchBox" class="search-box" placeholder="Rechercher...">
+
+                    <div class="split-container">
+                        <div class="split-section">
+                            <h3 class="section-title bacteria-title">Bactéries</h3>
+                            <div class="bacteria-grid" id="bacteriaGrid">
+                                {% for bacteria in bacteria_list %}
+                                <div class="bacteria-item" data-bacteria="{{ bacteria }}" data-type="bacteria" data-value="{{ bacteria }}">
+                                    <input type="checkbox" id="bacteria_{{ loop.index }}" name="bacteria" value="{{ bacteria }}">
+                                    {{ bacteria }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="split-section">
+                            <h3 class="section-title resistance-title">Résistances</h3>
+                            <div class="bacteria-grid" id="resistanceGrid">
+                                {% for resistance in resistance_list %}
+                                <div class="bacteria-item" data-bacteria="{{ resistance }}" data-type="resistance" data-value="{{ resistance }}">
+                                    <input type="checkbox" id="resistance_{{ loop.index }}" name="bacteria" value="{{ resistance }}">
+                                    {{ resistance }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Proposition de traitement
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyse en cours...</p>
+            </div>
+
+            <div class="result" id="result">
+                <h3 id="resultTitle"></h3>
+                <p id="resultMessage"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('bacteriaForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const selectedCount = document.getElementById('selectedCount');
+        const searchBox = document.getElementById('searchBox');
+        const bacteriaGrid = document.getElementById('bacteriaGrid');
+
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('input[name="bacteria"]:checked');
+            selectedCount.textContent = `${selected.length} sélectionnée(s)`;
+            submitBtn.disabled = selected.length === 0;
+        }
+
+        function filterBacteria() {
+            const searchTerm = searchBox.value.toLowerCase();
+            const allItems = document.querySelectorAll('.bacteria-item');
+
+            allItems.forEach(item => {
+                const itemName = item.dataset.bacteria.toLowerCase();
+                if (itemName.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'bacteria') {
+                updateSelectedCount();
+            }
+        });
+
+        // Make entire bacteria item clickable
+        document.addEventListener('click', function(e) {
+            // Find the closest bacteria-item parent
+            const bacteriaItem = e.target.closest('.bacteria-item');
+            if (bacteriaItem) {
+                const checkbox = bacteriaItem.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Toggle selected class for visual feedback
+                    bacteriaItem.classList.toggle('selected', checkbox.checked);
+                    updateSelectedCount();
+                }
+            }
+        });
+
+        // Update selected count for exam direct too
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'examDirect') {
+                updateSelectedCount();
+            }
+        });
+
+        searchBox.addEventListener('input', filterBacteria);
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const selectedBacteria = Array.from(document.querySelectorAll('input[name="bacteria"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const selectedExamDirect = Array.from(document.querySelectorAll('input[name="examDirect"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedBacteria.length === 0) {
+                alert('Veuillez sélectionner au moins une bactérie');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('/find_treatment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bacteria: selectedBacteria,
+                        examDirect: selectedExamDirect
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    document.getElementById('resultTitle').textContent = 'Traitement recommandé';
+
+                    let resultHTML = `<strong>Meilleur traitement commun :</strong><br>${data.treatment}<br><br>`;
+
+                    // Two column layout for bacteria and resistances
+                    resultHTML += `<div style="display: flex; gap: 24px; margin-top: 16px;">`;
+
+                    // Bacteria column
+                    /*
+		    if (data.bacteria && data.bacteria.length > 0) {
+                        resultHTML += `
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 0.875rem; font-weight: 600; color: #374151; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; padding: 8px 16px; border-radius: 6px; background: #eff6ff; color: #1e40af;">Bactéries</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+                        `;
+                        data.bacteria.forEach(bacteria => {
+                            resultHTML += `
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; font-size: 0.875rem; color: #374151;">
+                                    ${bacteria}
+                                </div>
+                            `;
+                        });
+                        resultHTML += `</div></div>`;
+                    }
+
+                    // Resistances column
+                    if (data.resistances && data.resistances.length > 0) {
+                        resultHTML += `
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 0.875rem; font-weight: 600; color: #374151; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; padding: 8px 16px; border-radius: 6px; background: #fef2f2; color: #b91c1c;">Résistances</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+                        `;
+                        data.resistances.forEach(resistance => {
+                            resultHTML += `
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; font-size: 0.875rem; color: #374151;">
+                                    ${resistance}
+                                </div>
+                            `;
+                        });
+                        resultHTML += `</div></div>`;
+                    }*/
+
+                    resultHTML += `</div>`;
+
+                    document.getElementById('resultMessage').innerHTML = resultHTML;
+                } else {
+                    result.className = 'result error';
+                    document.getElementById('resultTitle').textContent = 'Aucun traitement commun';
+                    document.getElementById('resultMessage').textContent = data.message || 'Aucun traitement commun n\'a pu être trouvé pour ces bactéries.';
+                }
+            } catch (error) {
+                result.className = 'result error';
+                document.getElementById('resultTitle').textContent = 'Erreur d\'analyse';
+                document.getElementById('resultMessage').textContent = 'Une erreur s\'est produite lors de l\'analyse.';
+            } finally {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initialize
+        updateSelectedCount();
+    </script>
+</body>
+</html>
