@@ -344,59 +344,31 @@
                     </label>
 
                     <input type="text" id="searchBox" class="search-box" placeholder="Rechercher...">
-
-                    <div class="split-container">
+		      <div class="split-container">
                         <div class="split-section">
                             <h3 class="section-title bacteria-title">Bactéries</h3>
                             <div class="bacteria-grid" id="bacteriaGrid">
-                                <div class="bacteria-item" data-bacteria="E. coli" data-type="bacteria" data-value="E. coli">
-                                    <input type="checkbox" id="bacteria_1" name="bacteria" value="E. coli">
-                                    E. coli
+                                {% for bacteria in bacteria_list %}
+                                <div class="bacteria-item" data-bacteria="{{ bacteria }}" data-type="bacteria" data-value="{{ bacteria }}">
+                                    <input type="checkbox" id="bacteria_{{ loop.index }}" name="bacteria" value="{{ bacteria }}">
+                                    {{ bacteria }}
                                 </div>
-                                <div class="bacteria-item" data-bacteria="Klebsiella pneumoniae" data-type="bacteria" data-value="Klebsiella pneumoniae">
-                                    <input type="checkbox" id="bacteria_2" name="bacteria" value="Klebsiella pneumoniae">
-                                    Klebsiella pneumoniae
-                                </div>
-                                <div class="bacteria-item" data-bacteria="Pseudomonas aeruginosa" data-type="bacteria" data-value="Pseudomonas aeruginosa">
-                                    <input type="checkbox" id="bacteria_3" name="bacteria" value="Pseudomonas aeruginosa">
-                                    Pseudomonas aeruginosa
-                                </div>
-                                <div class="bacteria-item" data-bacteria="Staphylococcus aureus" data-type="bacteria" data-value="Staphylococcus aureus">
-                                    <input type="checkbox" id="bacteria_4" name="bacteria" value="Staphylococcus aureus">
-                                    Staphylococcus aureus
-                                </div>
-                                <div class="bacteria-item" data-bacteria="Enterococcus faecalis" data-type="bacteria" data-value="Enterococcus faecalis">
-                                    <input type="checkbox" id="bacteria_5" name="bacteria" value="Enterococcus faecalis">
-                                    Enterococcus faecalis
-                                </div>
+                                {% endfor %}
                             </div>
                         </div>
-
                         <div class="split-section">
                             <h3 class="section-title resistance-title">Résistances</h3>
                             <div class="bacteria-grid" id="resistanceGrid">
-                                <div class="bacteria-item" data-bacteria="BLSE" data-type="resistance" data-value="BLSE">
-                                    <input type="checkbox" id="resistance_1" name="bacteria" value="BLSE">
-                                    BLSE
+                                {% for resistance in resistance_list %}
+                                <div class="bacteria-item" data-bacteria="{{ resistance }}" data-type="resistance" data-value="{{ resistance }}">
+                                    <input type="checkbox" id="resistance_{{ loop.index }}" name="bacteria" value="{{ resistance }}">
+                                    {{ resistance }}
                                 </div>
-                                <div class="bacteria-item" data-bacteria="MRSA" data-type="resistance" data-value="MRSA">
-                                    <input type="checkbox" id="resistance_2" name="bacteria" value="MRSA">
-                                    MRSA
-                                </div>
-                                <div class="bacteria-item" data-bacteria="VRE" data-type="resistance" data-value="VRE">
-                                    <input type="checkbox" id="resistance_3" name="bacteria" value="VRE">
-                                    VRE
-                                </div>
-                                <div class="bacteria-item" data-bacteria="Carbapenemase" data-type="resistance" data-value="Carbapenemase">
-                                    <input type="checkbox" id="resistance_4" name="bacteria" value="Carbapenemase">
-                                    Carbapenemase
-                                </div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
-
-
                 <button type="submit" class="submit-btn" id="submitBtn">
                     Proposition de traitement
                 </button>
